@@ -1,33 +1,28 @@
-import { MongoClient } from 'mongodb'
+import { MongoClient, Db } from 'mongodb';
 
-if (!process.env.MONGODB_URI) {
-  throw new Error('Invalid/Missing environment variable: "MONGODB_URI"')
-}
+// Replace the following with your MongoDB connection string
+const MONGODB_URI = 'mongodb+srv://ersinaydinworks:lbG1cTk63InvZ8ig@nextjs-mongo-excel.angacza.mongodb.net/?retryWrites=true&w=majority';
+const MONGODB_DB = 'Product';
 
-const uri = process.env.MONGODB_URI
-const options = {}
+let cachedClient: MongoClient;
+let cachedDb: Db;
 
-let client
-let clientPromise: Promise<MongoClient>
-
-if (process.env.NODE_ENV === 'development') {
-  // In development mode, use a global variable so that the value
-  // is preserved across module reloads caused by HMR (Hot Module Replacement).
-  let globalWithMongo = global as typeof globalThis & {
-    _mongoClientPromise?: Promise<MongoClient>
+export async function connectToDatabase() {
+  if (cachedClient && cachedDb) {
+    return { client: cachedClient, db: cachedDb };
   }
 
-  if (!globalWithMongo._mongoClientPromise) {
-    client = new MongoClient(uri, options)
-    globalWithMongo._mongoClientPromise = client.connect()
-  }
-  clientPromise = globalWithMongo._mongoClientPromise
-} else {
-  // In production mode, it's best to not use a global variable.
-  client = new MongoClient(uri, options)
-  clientPromise = client.connect()
-}
+  try {
+    const client = await MongoClient.connect(MONGODB_URI);
 
-// Export a module-scoped MongoClient promise. By doing this in a
-// separate module, the client can be shared across functions.
-export default clientPromise
+    const db = client.db(MONGODB_DB);
+
+    cachedClient = client;
+    cachedDb = db;
+
+    return { client, db };
+  } catch (error) {
+    console.error('Failed to connect to MongoDB:', error);
+    throw error;
+  }
+}
