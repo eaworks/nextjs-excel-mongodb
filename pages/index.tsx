@@ -23,9 +23,9 @@ const ImportExcel = () => {
     const workbook = XLSX.read(file, { type: 'binary' });
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
-    const data:typeof Product[] = XLSX.utils.sheet_to_json(sheet);
-    const { db } = await connectToDatabase();
-    await db.collection('Product').insertMany(data);
+    const excelData:typeof Product[] = XLSX.utils.sheet_to_json(sheet);
+    // const { db } = await connectToDatabase();
+    // await db.collection('Product').insertMany(data);
         // const excelData = e.target?.result;
         // const workbook = XLSX.read(excelData, { type: "binary" });
         // // let data:any = [];
@@ -47,7 +47,7 @@ const ImportExcel = () => {
         //   temp.forEach((res) => {
         //     data.push(res)
         //   })
-          console.log(data);  
+          console.log(excelData);  
         //   return data;
         // }
         // const sheetName = workbook.SheetNames[0];
